@@ -198,9 +198,9 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                         >
                             {switchedNetwork ? (
                                 <>
-                                    Switched{" "}
-                                    <CheckIcon className="text-white h-5 w-5 inline-block" />
-                                    {"  -  "}
+                                    Switched
+                                    <CheckIcon className="text-white h-5 w-5 inline-block ml-2" />
+                                    <span className="mx-4">-</span>
                                 </>
                             ) : null}
                             Submit to {tx.chain}
