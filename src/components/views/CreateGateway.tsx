@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 
-import { CreateGatewayParams } from "../../lib/renJS";
+import { CheckIcon } from "@heroicons/react/solid";
+
+import { AssetOption, CreateGatewayParams } from "../../lib/renJS";
 import { Spinner } from "./Spinner";
 import { TokenSelection } from "./TokenSelection";
 
@@ -8,6 +10,10 @@ interface Props {
     connectFrom?: () => Promise<void>;
 
     createGatewayParams: CreateGatewayParams;
+    validFromOptions: Array<AssetOption>;
+
+    validToOptions: Array<AssetOption>;
+
     updateCreateGatewayParams: (state: CreateGatewayParams) => void;
     handleCreateGateway: () => Promise<void>;
 }
@@ -17,6 +23,8 @@ function CreateGateway({
     // connectTo,
 
     createGatewayParams,
+    validFromOptions,
+    validToOptions,
     updateCreateGatewayParams,
     handleCreateGateway,
 }: Props) {
@@ -26,9 +34,10 @@ function CreateGateway({
     const [errorCreatingGateway, setErrorCreatingGateway] = useState<
         Error | undefined
     >();
+    const [connectedFrom, setConnectedFrom] = useState(false);
 
     const onSelectFromOption = useCallback(
-        (from: { asset: string; chain: string }) => {
+        (from: { asset: string; chain: string; assetOrigin: string }) => {
             updateCreateGatewayParams({
                 ...createGatewayParams,
                 from,
@@ -38,7 +47,7 @@ function CreateGateway({
     );
 
     const onSelectToOption = useCallback(
-        (to: { asset: string; chain: string }) => {
+        (to: { asset: string; chain: string; assetOrigin: string }) => {
             updateCreateGatewayParams({
                 ...createGatewayParams,
                 to,
@@ -69,7 +78,9 @@ function CreateGateway({
         setConnectingFrom(true);
         try {
             await connectFrom();
+            setConnectedFrom(true);
         } catch (error: any) {
+            console.error(error);
             setConnectingFromError(error);
         }
         setConnectingFrom(false);
@@ -86,11 +97,23 @@ function CreateGateway({
             [updateCreateGatewayParams, createGatewayParams]
         );
 
+    const onToAddressChange: React.ChangeEventHandler<HTMLInputElement> =
+        useCallback(
+            (e) => {
+                updateCreateGatewayParams({
+                    ...createGatewayParams,
+                    toAddress: e.target.value,
+                });
+            },
+            [updateCreateGatewayParams, createGatewayParams]
+        );
+
     const onCreateGateway = useCallback(async () => {
         setCreatingGateway(true);
         try {
             await handleCreateGateway();
         } catch (error: any) {
+            console.error(error);
             setErrorCreatingGateway(error);
         }
         setCreatingGateway(false);
@@ -113,7 +136,7 @@ function CreateGateway({
                 <span className="mr-2">From:</span>
                 <TokenSelection
                     option={createGatewayParams.from}
-                    validOptions={createGatewayParams.validFromOptions}
+                    validOptions={validFromOptions}
                     onSelectOption={onSelectFromOption}
                     onCancelOption={onCancelFromOption}
                 />
@@ -122,11 +145,23 @@ function CreateGateway({
                 <span className="mr-2">To:</span>
                 <TokenSelection
                     option={createGatewayParams.to}
-                    validOptions={createGatewayParams.validToOptions}
+                    validOptions={validToOptions}
                     onSelectOption={onSelectToOption}
                     onCancelOption={onCancelToOption}
                 />
             </div>
+
+            {createGatewayParams.to?.toAddressRequired ? (
+                <div className="flex items-center">
+                    <span className="mr-2">Address:</span>
+                    <input
+                        type="text"
+                        className="p-2 mt-1 border focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                        value={createGatewayParams.toAddress}
+                        onChange={onToAddressChange}
+                    />
+                </div>
+            ) : null}
 
             {/* {connectFrom || connectTo ? ( */}
             {connectFrom ? (
@@ -170,7 +205,9 @@ function CreateGateway({
                         disabled={
                             !createGatewayParams.from ||
                             !createGatewayParams.to ||
-                            creatingGateway
+                            creatingGateway ||
+                            (createGatewayParams.to?.toAddressRequired &&
+                                !createGatewayParams.toAddress)
                         }
                         onClick={onCreateGateway}
                         className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
@@ -180,7 +217,16 @@ function CreateGateway({
                                 <Spinner /> Creating gateway
                             </>
                         ) : (
-                            <>Create gateway</>
+                            <>
+                                {connectedFrom ? (
+                                    <>
+                                        Connected
+                                        <CheckIcon className="text-white h-5 w-5 inline-block ml-2" />
+                                        <span className="mx-4">-</span>
+                                    </>
+                                ) : null}
+                                Create gateway
+                            </>
                         )}
                     </button>
                     {errorCreatingGateway ? (

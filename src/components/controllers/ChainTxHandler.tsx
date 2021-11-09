@@ -9,6 +9,7 @@ import {
     TxWaiter,
 } from "@renproject/utils";
 
+import { RenVMCrossChainTxSubmitter } from "../../../../ren-js-v3/packages/ren/build/main/renVMTxSubmitter";
 import { RenState } from "../../state/renState";
 import { Spinner } from "../views/Spinner";
 
@@ -22,7 +23,7 @@ export interface Props {
 const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
     const { injectedWeb3, chains } = RenState.useContainer();
 
-    const [submitting, setSubmitting] = useState(false);
+    const [submitting, setSubmitting] = useState(autoSubmit ? true : false);
     const [waiting, setWaiting] = useState(false);
 
     const [errorSubmitting, setErrorSubmitting] = useState<Error | undefined>();
@@ -52,11 +53,12 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         if (tx.submit && tx.status.status === ChainTransactionStatus.Ready) {
             try {
                 setSubmitting(true);
-                await tx.submit({
-                    txConfig: {
-                        gasLimit: 1000000,
-                    },
-                });
+                await tx.submit();
+                // {
+                //     txConfig: {
+                //         gasLimit: 1000000,
+                //     },
+                // }
                 wait().catch(console.error);
             } catch (error: any) {
                 setErrorSubmitting(error);
@@ -90,7 +92,9 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
             if (
                 chainID !==
                 new BigNumber(
-                    (chains[tx.chain].chain as Ethereum).network.network.chainId
+                    (
+                        chains[tx.chain].chain as Ethereum
+                    ).network.network?.chainId
                 ).toNumber()
             ) {
                 setWrongNetwork(true);
@@ -147,18 +151,23 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 <>
                     {errorSubmitting ? (
                         <p>
-                            Error submitting: {String(errorSubmitting.message)}.{" "}
+                            <span className="text-red-500">
+                                Error submitting:{" "}
+                                {String(errorSubmitting.message)}.
+                            </span>{" "}
                             <button
                                 onClick={submit}
                                 className="group w-full mt-4 relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                             >
-                                Retry
+                                Retry submitting to {tx.chain}
                             </button>
                         </p>
                     ) : errorWaiting ? (
                         <p>
-                            Error waiting for transaction confirmations:{" "}
-                            {String(errorWaiting.message)}.{" "}
+                            <span className="text-red-500">
+                                Error waiting for {tx.chain} transaction
+                                confirmations: {String(errorWaiting.message)}.
+                            </span>{" "}
                             <button
                                 onClick={wait}
                                 className="group w-full mt-4 relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
@@ -183,6 +192,18 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                                 ? "confirmation"
                                 : "confirmations"}
                             ...
+                            {(tx as RenVMCrossChainTxSubmitter).status.response
+                                ?.txStatus ? (
+                                <>
+                                    {" "}
+                                    (
+                                    {
+                                        (tx as RenVMCrossChainTxSubmitter)
+                                            .status.response?.txStatus
+                                    }
+                                    )
+                                </>
+                            ) : null}
                         </button>
                     ) : wrongNetwork ? (
                         <button

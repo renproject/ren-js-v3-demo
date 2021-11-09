@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { createContainer } from "unstated-next";
 
-import { Ethereum } from "@renproject/chains-ethereum";
 import RenJS, { GatewayTransaction } from "@renproject/ren";
 
 import { NETWORK } from "../lib/constants";
@@ -50,7 +49,19 @@ function useRenState() {
                         "any"
                     ).getSigner(),
                 });
-                chains["Arbitrum"].chain.withProvider!({
+                chains["Polygon"].chain.withProvider!({
+                    signer: new ethers.providers.Web3Provider(
+                        provider,
+                        "any"
+                    ).getSigner(),
+                });
+                chains["Fantom"].chain.withProvider!({
+                    signer: new ethers.providers.Web3Provider(
+                        provider,
+                        "any"
+                    ).getSigner(),
+                });
+                chains["Avalanche"].chain.withProvider!({
                     signer: new ethers.providers.Web3Provider(
                         provider,
                         "any"

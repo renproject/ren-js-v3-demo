@@ -17,10 +17,13 @@ function GatewayTxList({ transactions }: Props) {
             <div className="w-full">
                 {transactions.length ? (
                     transactions.map((transaction) => (
-                        <GatewayTxController transaction={transaction} />
+                        <GatewayTxController
+                            key={transaction.hash}
+                            transaction={transaction}
+                        />
                     ))
                 ) : (
-                    <p className="text-sm font-medium">No transactions</p>
+                    <p className="text-sm font-medium m-4">No transactions</p>
                 )}
             </div>
         </div>

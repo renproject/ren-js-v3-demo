@@ -3,18 +3,14 @@ import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon, XIcon } from "@heroicons/react/solid";
 
+import { AssetOption } from "../../lib/renJS";
+
 interface Props {
-    option?: {
-        asset: string;
-        chain: string;
-    };
+    option?: AssetOption;
 
-    validOptions: Array<{
-        asset: string;
-        chain: string;
-    }>;
+    validOptions: Array<AssetOption>;
 
-    onSelectOption: (options: { asset: string; chain: string }) => void;
+    onSelectOption: (options: AssetOption) => void;
     onCancelOption: () => void;
 }
 

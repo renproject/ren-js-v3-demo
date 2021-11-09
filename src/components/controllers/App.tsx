@@ -4,7 +4,7 @@ import TransactionsSection from "./TransactionsSection";
 
 function App() {
     return (
-        <div className="antialiased font-sans bg-gray-200 h-screen w-screen flex justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="antialiased font-sans bg-gray-100 h-screen w-screen flex justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-screen-2xl flex flex-col w-full">
                 <div className="py-4">
                     <h1 className="font-bold">RenJS v3 Demo</h1>

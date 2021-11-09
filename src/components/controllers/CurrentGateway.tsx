@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { CheckIcon } from "@heroicons/react/solid";
+import { CheckIcon, XIcon } from "@heroicons/react/solid";
 import { Gateway } from "@renproject/ren";
 import { ChainTransactionStatus } from "@renproject/utils";
 
+import { Ethereum } from "../../../../ren-js-v3/packages/chains/chains-ethereum/build/main";
 import GatewaySummary from "../views/GatewaySummary";
 import { Spinner } from "../views/Spinner";
 import ViewDepositGateway from "../views/ViewDepositGateway";
@@ -18,11 +19,28 @@ function CurrentGateway({ gateway, onDone }: Props) {
     const [done, setDone] = useState(false);
     const [approved, setApproved] = useState(false);
     const [transactionDetected, setTransactionDetected] = useState(false);
+    const [balance, setBalance] = useState<string>();
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const decimals = await (
+                    gateway.fromChain as Ethereum
+                ).assetDecimals(gateway.params.asset);
+                const balance = await (
+                    gateway.fromChain as Ethereum
+                ).getBalance(gateway.params.asset);
+                setBalance(balance.shiftedBy(-decimals).toFixed());
+            } catch (error) {
+                console.error(error);
+            }
+        })().catch(console.error);
+    }, [gateway.params.asset, gateway.fromChain]);
 
     const fromAsset = gateway.params.asset;
     const fromChain = gateway.fromChain.chain;
     const toAsset = gateway.params.asset;
-    const toChain = gateway.fromChain.chain;
+    const toChain = gateway.toChain.chain;
 
     const onGatewayDone = useCallback(() => {
         setDone(true);
@@ -40,12 +58,17 @@ function CurrentGateway({ gateway, onDone }: Props) {
 
     return (
         <div>
-            <GatewaySummary
-                fromAsset={fromAsset}
-                fromChain={fromChain}
-                toAsset={toAsset}
-                toChain={toChain}
-            />
+            <div className="flex justify-between">
+                <GatewaySummary
+                    fromAsset={fromAsset}
+                    fromChain={fromChain}
+                    toAsset={toAsset}
+                    toChain={toChain}
+                />
+                <button className="h-5 w-5 -mt-4 -mr-4" onClick={onDone}>
+                    <XIcon className="text-black h-5 w-5" aria-hidden="true" />
+                </button>
+            </div>
             {done ? (
                 !transactionDetected ? (
                     <div className="mt-4">
@@ -68,16 +91,6 @@ function CurrentGateway({ gateway, onDone }: Props) {
                         </button>
                     </div>
                 )
-            ) : gateway.gatewayAddress ? (
-                <>
-                    <ViewDepositGateway
-                        gatewayAddress={gateway.gatewayAddress}
-                        fromAsset={fromAsset}
-                        fromChain={fromChain}
-                        toAsset={toAsset}
-                        toChain={toChain}
-                    />
-                </>
             ) : !approved &&
               gateway.setup.approval &&
               gateway.setup.approval.status.status !==
@@ -107,6 +120,21 @@ function CurrentGateway({ gateway, onDone }: Props) {
                         />
                     </div>
                 </>
+            ) : gateway.gatewayAddress ? (
+                <>
+                    <ViewDepositGateway
+                        gatewayAddress={gateway.gatewayAddress}
+                        fromAsset={fromAsset}
+                        fromChain={fromChain}
+                        toAsset={toAsset}
+                        toChain={toChain}
+                    />
+                </>
+            ) : null}
+            {balance ? (
+                <p className="text-sm text-gray-600 mt-4">
+                    Balance: {balance} {gateway.params.asset}
+                </p>
             ) : null}
         </div>
     );

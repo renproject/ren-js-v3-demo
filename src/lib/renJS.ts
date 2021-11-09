@@ -2,41 +2,32 @@ import { providers } from "ethers";
 
 import { Bitcoin } from "@renproject/chains-bitcoin";
 import {
-    Arbitrum,
+    Avalanche,
     BinanceSmartChain,
     Ethereum,
     EthereumBaseChain,
     EthProvider,
     EvmNetworkConfig,
+    Fantom,
+    Polygon,
 } from "@renproject/chains-ethereum";
 import RenJS, { Gateway } from "@renproject/ren";
 import { Chain, RenNetwork } from "@renproject/utils";
 
 import { NETWORK } from "./constants";
 
+export interface AssetOption {
+    chain: string;
+    asset: string;
+    assetOrigin: string;
+    toAddressRequired?: boolean;
+}
+
 export interface CreateGatewayParams {
     amount?: string;
     toAddress?: string;
-
-    from?: {
-        chain: string;
-        asset: string;
-    };
-
-    to?: {
-        chain: string;
-        asset: string;
-    };
-
-    validFromOptions: Array<{
-        chain: string;
-        asset: string;
-    }>;
-
-    validToOptions: Array<{
-        chain: string;
-        asset: string;
-    }>;
+    from?: AssetOption;
+    to?: AssetOption;
 }
 
 export interface ChainInstance {
@@ -81,7 +72,9 @@ export const getEVMChain = <EVM extends EthereumBaseChain>(
 export const defaultChains = (): { [chain: string]: ChainInstance } => {
     const ethereum = getEVMChain(Ethereum, NETWORK);
     const binanceSmartChain = getEVMChain(BinanceSmartChain, NETWORK);
-    const arbitrum = getEVMChain(Arbitrum, NETWORK);
+    const polygon = getEVMChain(Polygon, NETWORK);
+    const avalanche = getEVMChain(Avalanche, NETWORK);
+    const fantom = getEVMChain(Fantom, NETWORK);
     const bitcoin = {
         chain: new Bitcoin(NETWORK),
     };
@@ -89,7 +82,9 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
     return {
         [Ethereum.chain]: ethereum,
         [BinanceSmartChain.chain]: binanceSmartChain,
-        [Arbitrum.chain]: arbitrum,
+        [Polygon.chain]: polygon,
+        [Avalanche.chain]: avalanche,
+        [Fantom.chain]: fantom,
         [Bitcoin.chain]: bitcoin,
     };
 };
@@ -109,7 +104,9 @@ export const createGateway = async (
     switch (newGatewayState.from.chain) {
         case Ethereum.chain:
         case BinanceSmartChain.chain:
-        case Arbitrum.chain:
+        case Polygon.chain:
+        case Avalanche.chain:
+        case Fantom.chain:
             from = (
                 chains[newGatewayState.from.chain].chain as Ethereum
             ).Account({ amount: newGatewayState.amount, convertToWei: true });
@@ -127,7 +124,9 @@ export const createGateway = async (
     switch (newGatewayState.to.chain) {
         case Ethereum.chain:
         case BinanceSmartChain.chain:
-        case Arbitrum.chain:
+        case Polygon.chain:
+        case Avalanche.chain:
+        case Fantom.chain:
             to = (chains[newGatewayState.to.chain].chain as Ethereum).Account();
             break;
         case Bitcoin.chain:
