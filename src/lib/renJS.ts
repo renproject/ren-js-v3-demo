@@ -56,7 +56,19 @@ export const getEVMChain = <EVM extends EthereumBaseChain>(
             `No configuration for ${ChainClass.name} on ${network}.`
         );
     }
-    const rpcUrl = config.network.rpcUrls[0];
+
+    let rpcUrl = config.network.rpcUrls[0];
+    if (process.env.REACT_APP_INFURA_KEY) {
+        for (const url of config.network.rpcUrls) {
+            if (url.match(/^https:\/\/.*\$\{INFURA_API_KEY\}/)) {
+                rpcUrl = url.replace(
+                    /\$\{INFURA_API_KEY\}/,
+                    process.env.REACT_APP_INFURA_KEY
+                );
+                break;
+            }
+        }
+    }
 
     const provider = new providers.JsonRpcProvider(rpcUrl);
 

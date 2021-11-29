@@ -81,20 +81,35 @@ const fromOptions = [
         assetOrigin: "Ethereum",
     },
     {
-        asset: "ETH",
+        asset: "MATIC",
         chain: "Polygon",
-        assetOrigin: "Ethereum",
+        assetOrigin: "Polygon",
     },
     {
-        asset: "ETH",
-        chain: "Fantom",
-        assetOrigin: "Ethereum",
+        asset: "MATIC",
+        chain: "BinanceSmartChain",
+        assetOrigin: "Polygon",
     },
     {
-        asset: "ETH",
-        chain: "Avalanche",
-        assetOrigin: "Ethereum",
+        asset: "MATIC",
+        chain: "Ethereum",
+        assetOrigin: "Polygon",
     },
+    // {
+    //     asset: "ETH",
+    //     chain: "Polygon",
+    //     assetOrigin: "Ethereum",
+    // },
+    // {
+    //     asset: "ETH",
+    //     chain: "Fantom",
+    //     assetOrigin: "Ethereum",
+    // },
+    // {
+    //     asset: "ETH",
+    //     chain: "Avalanche",
+    //     assetOrigin: "Ethereum",
+    // },
 ];
 
 const toOptions = fromOptions;
@@ -107,10 +122,13 @@ function GatewaySection() {
     let [currentGateway, setCurrentGateway] = useState<Gateway | undefined>();
     const onDone = useCallback(() => {
         if (currentGateway) {
-            currentGateway.removeListener("transaction", addTransaction);
+            currentGateway.eventEmitter.removeListener(
+                "transaction",
+                addTransaction
+            );
         }
         setCurrentGateway(undefined);
-    }, [setCurrentGateway]);
+    }, [addTransaction, currentGateway, setCurrentGateway]);
 
     // const [connecting, setConnecting] = useState<string | undefined>();
 
