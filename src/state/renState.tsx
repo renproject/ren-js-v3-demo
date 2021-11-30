@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { List } from "immutable";
 import { useCallback, useEffect, useState } from "react";
 import { createContainer } from "unstated-next";
 
@@ -8,6 +9,7 @@ import { TransactionParams } from "../../../ren-js-v3/packages/ren/build/main/ga
 import { NETWORK } from "../lib/constants";
 import { defaultChains } from "../lib/renJS";
 
+// Source: https://usehooks.com/useLocalStorage/
 function useLocalStorage<T>(
     key: string,
     initialValue: T
@@ -22,7 +24,7 @@ function useLocalStorage<T>(
             return item ? JSON.parse(item) : initialValue;
         } catch (error) {
             // If error also return initialValue
-            console.log(error);
+            console.error(error);
             return initialValue;
         }
     });
@@ -40,7 +42,7 @@ function useLocalStorage<T>(
             window.localStorage.setItem(key, JSON.stringify(valueToStore));
         } catch (error) {
             // A more advanced implementation would handle the error case
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -51,9 +53,16 @@ function useRenState() {
     const [renJS] = useState<RenJS>(() => new RenJS(NETWORK));
     const [chains, setChains] = useState(() => defaultChains());
     const [localTxs, setLocalTxs] = useLocalStorage<{
-        [web3Address: string]: { [key: string]: TransactionParams };
+        [web3Address: string]: {
+            [key: string]: {
+                params: TransactionParams;
+                done: boolean;
+                timestamp: number;
+            };
+        };
     }>(`ren-js-demo-v3:${NETWORK}:txs`, {});
     const [localTxsLoaded, setLocalTxsLoaded] = useState(false);
+    const [loadingLocalTxs, setLoadingLocalTxs] = useState(false);
 
     const [transactions, setTransactions] = useState<GatewayTransaction[]>([]);
 
@@ -66,14 +75,40 @@ function useRenState() {
     const addTransaction = useCallback(
         (tx: GatewayTransaction) => {
             setTransactions((txs) => [tx, ...txs]);
-            console.log("injectedWeb3Address", injectedWeb3Address);
-            console.log("adding tx", tx.params);
             if (injectedWeb3Address) {
                 setLocalTxs((txs) => ({
                     ...txs,
-                    [injectedWeb3Address.toLocaleLowerCase()]: {
-                        ...txs[injectedWeb3Address.toLocaleLowerCase()],
-                        [tx.hash]: tx.params,
+                    [injectedWeb3Address.toLowerCase()]: {
+                        ...txs[injectedWeb3Address.toLowerCase()],
+                        [tx.hash]: {
+                            params: tx.params,
+                            done: false,
+                            timestamp:
+                                (
+                                    (txs[injectedWeb3Address.toLowerCase()] ||
+                                        {})[tx.hash] || {}
+                                ).timestamp || Date.now(),
+                        },
+                    },
+                }));
+            }
+        },
+        [setLocalTxs, injectedWeb3Address]
+    );
+
+    const transactionDoneCallback = useCallback(
+        (tx: GatewayTransaction) => {
+            if (injectedWeb3Address) {
+                setLocalTxs((txs) => ({
+                    ...txs,
+                    [injectedWeb3Address.toLowerCase()]: {
+                        ...txs[injectedWeb3Address.toLowerCase()],
+                        [tx.hash]: {
+                            ...(txs[injectedWeb3Address.toLowerCase()] || {})[
+                                tx.hash
+                            ],
+                            done: true,
+                        },
                     },
                 }));
             }
@@ -130,13 +165,44 @@ function useRenState() {
                 try {
                     if (!localTxsLoaded) {
                         setLocalTxsLoaded(true);
-                        console.log(localTxs);
-                        for (const tx of Object.values(
-                            localTxs[address.toLowerCase()] || {}
-                        )) {
-                            renJS
-                                .gatewayTransaction(tx)
-                                .then((gatewayTx) => addTransaction(gatewayTx));
+                        let toLoad = localTxs[address.toLowerCase()];
+                        if (toLoad && Object.values(toLoad).length > 0) {
+                            setLoadingLocalTxs(true);
+                            Promise.allSettled(
+                                List(
+                                    Object.values(
+                                        localTxs[address.toLowerCase()] || {}
+                                    )
+                                )
+                                    .sortBy((tx) => tx.timestamp || 0)
+                                    .map(async (tx) => {
+                                        if (!tx.done) {
+                                            return await renJS.gatewayTransaction(
+                                                tx.params || tx
+                                            );
+                                        }
+                                    })
+                                    .toArray()
+                            )
+                                .then((results) => {
+                                    results.forEach((result) => {
+                                        if (
+                                            result &&
+                                            result.status === "fulfilled"
+                                        ) {
+                                            const value = result.value;
+                                            if (value) {
+                                                setTransactions((txs) => [
+                                                    value,
+                                                    ...txs,
+                                                ]);
+                                            }
+                                        }
+                                    });
+                                })
+                                .finally(() => {
+                                    setLoadingLocalTxs(false);
+                                });
                         }
                     }
                 } catch (error) {
@@ -155,9 +221,12 @@ function useRenState() {
         chains,
         connect,
         injectedWeb3,
+        injectedWeb3Address,
         setInjectedWeb3: setInjectedWeb3AndConnect,
         transactions,
         addTransaction,
+        loadingLocalTxs,
+        transactionDoneCallback,
     };
 }
 

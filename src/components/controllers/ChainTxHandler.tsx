@@ -41,12 +41,12 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
 
         try {
             setWaiting(true);
-            console.log("Calling tx.wait", tx.chain, target);
             await tx.wait(target).on("status", (status) => {
                 setConfirmations(status.confirmations);
             });
             onDone();
         } catch (error: any) {
+            console.error(error);
             setErrorWaiting(error);
         }
         setWaiting(false);
@@ -66,21 +66,26 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 });
                 wait().catch(console.error);
             } catch (error: any) {
+                console.error(error);
                 setErrorSubmitting(error);
             }
             setSubmitting(false);
         }
     }, [tx, wait]);
 
+    const [calledWait, setCalledWait] = useState(false);
+
     useEffect(() => {
-        if (autoSubmit) {
-            submit().catch(console.error);
+        if (!calledWait) {
+            setCalledWait(true);
+            if (autoSubmit) {
+                submit().catch(console.error);
+            }
+            if (tx.status.status !== ChainTransactionStatus.Ready) {
+                wait().catch(console.error);
+            }
         }
-        if (tx.status.status !== ChainTransactionStatus.Ready) {
-            setWaiting(true);
-            wait().catch(console.error);
-        }
-    }, [submit, autoSubmit, wait, tx.status.status]);
+    }, [calledWait, setCalledWait, submit, autoSubmit, wait, tx.status.status]);
 
     useEffect(() => {
         (async () => {
@@ -142,7 +147,6 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         );
     }
 
-    console.log("response", (tx as RenVMCrossChainTxSubmitter).status.response);
     const gatewayTarget = isDefined(target) ? target : tx.status.target;
 
     switch (tx.status.status) {
@@ -162,9 +166,9 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 <>
                     {errorSubmitting ? (
                         <p>
-                            <span className="text-red-500">
+                            <span className="text-red-500 break-words">
                                 Error submitting:{" "}
-                                {String(errorSubmitting.message)}.
+                                {String(errorSubmitting.message)}
                             </span>{" "}
                             <button
                                 onClick={submit}
@@ -175,7 +179,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                         </p>
                     ) : errorWaiting ? (
                         <p>
-                            <span className="text-red-500">
+                            <span className="text-red-500 break-words">
                                 Error waiting for {tx.chain} transaction
                                 confirmations: {String(errorWaiting.message)}.
                             </span>{" "}

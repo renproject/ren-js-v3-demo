@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { GatewayTransaction } from "@renproject/ren";
 
+import { RenState } from "../../state/renState";
 import GatewayTx from "../views/GatewayTx";
 
 export interface Props {
@@ -9,6 +10,8 @@ export interface Props {
 }
 
 const GatewayTxController = ({ transaction }: Props) => {
+    const { transactionDoneCallback } = RenState.useContainer();
+
     const [inDone, setInDone] = useState(false);
     const [renVMDone, setRenVMDone] = useState(false);
     const [outDone, setOutDone] = useState(false);
@@ -23,6 +26,7 @@ const GatewayTxController = ({ transaction }: Props) => {
 
     const onOutDone = () => {
         setOutDone(true);
+        transactionDoneCallback(transaction);
     };
 
     return (

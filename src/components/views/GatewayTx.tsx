@@ -4,6 +4,7 @@ import {
     TxWaiter,
 } from "@renproject/utils";
 
+import { NETWORK } from "../../lib/constants";
 import { RenState } from "../../state/renState";
 import ChainTxHandler from "../controllers/ChainTxHandler";
 
@@ -47,12 +48,31 @@ const GatewayTx = ({
     const { chains } = RenState.useContainer();
 
     return (
-        <div className="rounded-md w-full mt-5">
+        <div
+            className={`rounded-md w-full mt-5 ${
+                outTxDone ||
+                (outTx && outTx.status.status === ChainTransactionStatus.Done)
+                    ? "opacity-60"
+                    : ""
+            }`}
+        >
             <div className="px-4 py-5 space-y-2 sm:p-6 w-full h-full bg-white rounded-md p-4 flex flex-col border border-gray-300">
                 <h3 className="font-bold truncate">
                     {fromAsset} on {fromChain} to {toChain}
                 </h3>
-                <p className="truncate">Hash: {txHash}</p>
+                <p className="truncate">
+                    RenVM Hash:{" "}
+                    <a
+                        className="text-indigo-600"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://explorer${
+                            NETWORK !== "mainnet" ? `-${NETWORK}` : ""
+                        }.renproject.io/#/tx/${txHash}`}
+                    >
+                        {txHash}
+                    </a>
+                </p>
                 {inTx && inTx.status.transaction ? (
                     <p className="truncate">
                         {inTx.chain} tx:{" "}
@@ -91,11 +111,12 @@ const GatewayTx = ({
                 {!inTxDone &&
                 inTx &&
                 inTx.status.status !== ChainTransactionStatus.Done ? (
-                    <ChainTxHandler tx={inTx} onDone={onInDone} />
+                    <ChainTxHandler key={"in"} tx={inTx} onDone={onInDone} />
                 ) : !renVMDone &&
                   renVM &&
                   renVM.status.status !== ChainTransactionStatus.Done ? (
                     <ChainTxHandler
+                        key={"renVM"}
                         tx={renVM}
                         onDone={onRenVMDone}
                         autoSubmit={true}
@@ -103,7 +124,7 @@ const GatewayTx = ({
                 ) : !outTxDone &&
                   outTx &&
                   outTx.status.status !== ChainTransactionStatus.Done ? (
-                    <ChainTxHandler tx={outTx} onDone={onOutDone} />
+                    <ChainTxHandler key={"out"} tx={outTx} onDone={onOutDone} />
                 ) : null}
             </div>
         </div>

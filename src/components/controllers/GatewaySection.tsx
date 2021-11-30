@@ -115,8 +115,6 @@ function GatewaySection() {
         (newParams: CreateGatewayParams) => {
             setCreateGatewayParams(newParams);
 
-            console.log("newParams.asset", newParams.asset);
-
             let newFromOptions = fromOptions;
             newFromOptions = newFromOptions.filter(
                 (x) =>

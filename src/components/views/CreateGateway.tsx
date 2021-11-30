@@ -209,16 +209,18 @@ function CreateGateway({
                         {connectingFrom ? (
                             <>
                                 <Spinner /> Connecting{" "}
-                                {createGatewayParams.from?.chain} wallet
+                                {/* {createGatewayParams.from?.chain} wallet */}
+                                Web3 wallet
                             </>
                         ) : (
                             <>
-                                Connect {createGatewayParams.from?.chain} wallet
+                                {/* Connect {createGatewayParams.from?.chain} wallet */}
+                                Connect Web3 wallet
                             </>
                         )}
                     </button>
                     {connectingFromError ? (
-                        <p className="text-red-500">
+                        <p className="text-red-500 break-words">
                             {String(connectingFromError.message)}
                         </p>
                     ) : null}
@@ -264,7 +266,7 @@ function CreateGateway({
                         )}
                     </button>
                     {errorCreatingGateway ? (
-                        <p className="text-red-500">
+                        <p className="text-red-500 break-words">
                             {String(errorCreatingGateway.message)}
                         </p>
                     ) : null}
