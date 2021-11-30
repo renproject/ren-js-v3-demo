@@ -61,7 +61,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 setSubmitting(true);
                 await tx.submit({
                     txConfig: {
-                        gasLimit: 500000,
+                        // gasLimit: 500000,
                     },
                 });
                 wait().catch(console.error);

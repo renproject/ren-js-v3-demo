@@ -2,7 +2,7 @@
     "name": "demo-v3",
     "version": "0.1.0",
     "private": true,
-    "homepage": "https://renproject.github.io/ren-js-v3-demo-mainnet",
+    "homepage": "https://renproject.github.io/ren-js-v3-demo",
     "dependencies": {
         "@craco/craco": "^6.4.0",
         "@headlessui/react": "^1.4.1",
