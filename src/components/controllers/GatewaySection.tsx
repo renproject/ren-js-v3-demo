@@ -1,116 +1,69 @@
 import { useCallback, useState } from "react";
 
 import detectEthereumProvider from "@metamask/detect-provider";
+import Chains from "@renproject/chains";
 import { Gateway } from "@renproject/ren";
 
-import { createGateway, CreateGatewayParams } from "../../lib/renJS";
+import {
+    AssetOption,
+    createGateway,
+    CreateGatewayParams,
+} from "../../lib/renJS";
 import { RenState } from "../../state/renState";
 import CreateGateway from "../views/CreateGateway";
 import CurrentGateway from "./CurrentGateway";
 
-const fromOptions = [
-    {
-        asset: "BTC",
-        chain: "Bitcoin",
-        assetOrigin: "Bitcoin",
-        toAddressRequired: true,
-    },
-    {
-        asset: "BTC",
-        chain: "Ethereum",
-        assetOrigin: "Bitcoin",
-    },
-    {
-        asset: "DAI",
-        chain: "Ethereum",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "DAI",
-        chain: "BinanceSmartChain",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "DAI",
-        chain: "Polygon",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "DAI",
-        chain: "Fantom",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "DAI",
-        chain: "Avalanche",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "USDC",
-        chain: "Ethereum",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "USDC",
-        chain: "BinanceSmartChain",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "USDC",
-        chain: "Polygon",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "USDC",
-        chain: "Fantom",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "USDC",
-        chain: "Avalanche",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "ETH",
-        chain: "Ethereum",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "ETH",
-        chain: "BinanceSmartChain",
-        assetOrigin: "Ethereum",
-    },
-    {
-        asset: "MATIC",
-        chain: "Polygon",
-        assetOrigin: "Polygon",
-    },
-    {
-        asset: "MATIC",
-        chain: "BinanceSmartChain",
-        assetOrigin: "Polygon",
-    },
-    {
-        asset: "MATIC",
-        chain: "Ethereum",
-        assetOrigin: "Polygon",
-    },
-    // {
-    //     asset: "ETH",
-    //     chain: "Polygon",
-    //     assetOrigin: "Ethereum",
-    // },
-    // {
-    //     asset: "ETH",
-    //     chain: "Fantom",
-    //     assetOrigin: "Ethereum",
-    // },
-    // {
-    //     asset: "ETH",
-    //     chain: "Avalanche",
-    //     assetOrigin: "Ethereum",
-    // },
+const mintChains = [
+    "Ethereum",
+    "BinanceSmartChain",
+    "Polygon",
+    "Fantom",
+    "Avalanche",
+    "Arbitrum",
 ];
+
+const assets = Object.values(Chains)
+    .reduce(
+        (acc, chain) => [
+            ...acc,
+            ...Object.values(chain.assets).map((asset) => ({
+                asset,
+                lockChain: chain.chain,
+                mintChains: mintChains.filter(
+                    (mintChain) => mintChain !== chain.chain
+                ),
+            })),
+        ],
+        [] as Array<{
+            asset: string;
+            lockChain: string;
+            mintChains: string[];
+        }>
+    )
+    .filter(
+        (asset) => mintChains.includes(asset.lockChain) || asset.asset === "BTC"
+    );
+
+const fromOptions = assets.reduce(
+    (acc, asset) => [
+        ...acc,
+        {
+            asset: asset.asset,
+            chain: asset.lockChain,
+            assetOrigin: asset.lockChain,
+            toAddressRequired: !mintChains.includes(asset.lockChain),
+        },
+        ...asset.mintChains.map(
+            (mintChain) => ({
+                asset: asset.asset,
+                chain: mintChain,
+                assetOrigin: asset.lockChain,
+            }),
+            [] as AssetOption[]
+        ),
+    ],
+    [] as AssetOption[]
+);
 
 const toOptions = fromOptions;
 
@@ -139,8 +92,8 @@ function GatewaySection() {
             from: undefined,
             to: undefined,
         });
-    const [validFromOptions, setValidFromOptions] = useState(fromOptions);
-    const [validToOptions, setValidToOptions] = useState(toOptions);
+    const [validFromOptions, setValidFromOptions] = useState<AssetOption[]>([]);
+    const [validToOptions, setValidToOptions] = useState<AssetOption[]>([]);
 
     const handleCreateGateway = useCallback(async () => {
         const gateway = await createGateway(renJS, createGatewayParams, chains);
@@ -152,7 +105,7 @@ function GatewaySection() {
         const provider: any = await detectEthereumProvider();
         if (provider) {
             await provider.enable();
-            setInjectedWeb3(provider);
+            await setInjectedWeb3(provider);
         } else {
             throw new Error(`Please install MetaMask.`);
         }
@@ -162,28 +115,32 @@ function GatewaySection() {
         (newParams: CreateGatewayParams) => {
             setCreateGatewayParams(newParams);
 
+            console.log("newParams.asset", newParams.asset);
+
             let newFromOptions = fromOptions;
-            if (newParams.to) {
-                newFromOptions = newFromOptions.filter(
-                    (x) =>
-                        x.asset === newParams.to!.asset &&
-                        x.chain !== newParams.to!.chain &&
-                        (newParams.to!.chain === newParams.to!.assetOrigin ||
-                            x.chain === newParams.to!.assetOrigin)
-                );
-            }
+            newFromOptions = newFromOptions.filter(
+                (x) =>
+                    x.asset === newParams.asset &&
+                    (newParams.to
+                        ? x.asset === newParams.to.asset &&
+                          x.chain !== newParams.to.chain &&
+                          (newParams.to.chain === newParams.to.assetOrigin ||
+                              x.chain === newParams.to.assetOrigin)
+                        : true)
+            );
 
             let newToOptions = toOptions;
-            if (newParams.from) {
-                newToOptions = newToOptions.filter(
-                    (x) =>
-                        x.asset === newParams.from!.asset &&
-                        x.chain !== newParams.from!.chain &&
-                        (newParams.from!.chain ===
-                            newParams.from!.assetOrigin ||
-                            x.chain === newParams.from!.assetOrigin)
-                );
-            }
+            newToOptions = newToOptions.filter(
+                (x) =>
+                    x.asset === newParams.asset &&
+                    (newParams.from
+                        ? x.asset === newParams.from.asset &&
+                          x.chain !== newParams.from.chain &&
+                          (newParams.from.chain ===
+                              newParams.from.assetOrigin ||
+                              x.chain === newParams.from.assetOrigin)
+                        : true)
+            );
 
             setValidFromOptions(newFromOptions);
             setValidToOptions(newToOptions);
@@ -196,10 +153,15 @@ function GatewaySection() {
             {/* {connecting ? <Connect chain={connecting} /> : null} */}
 
             {currentGateway ? (
-                <CurrentGateway gateway={currentGateway} onDone={onDone} />
+                <CurrentGateway
+                    amount={createGatewayParams.amount}
+                    gateway={currentGateway}
+                    onDone={onDone}
+                />
             ) : (
                 <CreateGateway
                     createGatewayParams={createGatewayParams}
+                    assets={assets.map((asset) => asset.asset)}
                     validFromOptions={validFromOptions}
                     validToOptions={validToOptions}
                     updateCreateGatewayParams={updateCreateGatewayParams}

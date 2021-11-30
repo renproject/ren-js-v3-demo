@@ -1,16 +1,15 @@
-import { AssetOption } from "../../lib/renJS";
 import { Dropdown } from "./Dropdown";
 
 interface Props {
-    option?: AssetOption;
+    option?: string;
 
-    validOptions: Array<AssetOption>;
+    validOptions: Array<string>;
 
-    onSelectOption: (options: AssetOption) => void;
+    onSelectOption: (options: string) => void;
     onCancelOption: () => void;
 }
 
-export const TokenSelection = ({
+export const AssetSelection = ({
     option,
     validOptions,
     onSelectOption,
@@ -22,13 +21,13 @@ export const TokenSelection = ({
                 option
                     ? {
                           value: option,
-                          label: `${option.chain}`,
+                          label: option,
                       }
-                    : option
+                    : undefined
             }
             validOptions={validOptions.map((option) => ({
                 value: option,
-                label: `${option.chain}`,
+                label: option,
             }))}
             onSelectOption={(option) => onSelectOption(option.value)}
             onCancelOption={onCancelOption}

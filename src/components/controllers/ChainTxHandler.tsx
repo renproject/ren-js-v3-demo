@@ -5,6 +5,7 @@ import { CheckIcon } from "@heroicons/react/solid";
 import { Ethereum } from "@renproject/chains-ethereum";
 import {
     ChainTransactionStatus,
+    isDefined,
     TxSubmitter,
     TxWaiter,
 } from "@renproject/utils";
@@ -32,13 +33,18 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
     const [wrongNetwork, setWrongNetwork] = useState<boolean | undefined>();
     const [switchedNetwork, setSwitchedNetwork] = useState<boolean>(false);
 
+    const [confirmations, setConfirmations] = useState<number>();
+
     const wait = useCallback(async () => {
         setErrorSubmitting(undefined);
         setErrorWaiting(undefined);
 
         try {
             setWaiting(true);
-            await tx.wait(target);
+            console.log("Calling tx.wait", tx.chain, target);
+            await tx.wait(target).on("status", (status) => {
+                setConfirmations(status.confirmations);
+            });
             onDone();
         } catch (error: any) {
             setErrorWaiting(error);
@@ -53,12 +59,11 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         if (tx.submit && tx.status.status === ChainTransactionStatus.Ready) {
             try {
                 setSubmitting(true);
-                await tx.submit();
-                // {
-                //     txConfig: {
-                //         gasLimit: 1000000,
-                //     },
-                // }
+                await tx.submit({
+                    txConfig: {
+                        gasLimit: 500000,
+                    },
+                });
                 wait().catch(console.error);
             } catch (error: any) {
                 setErrorSubmitting(error);
@@ -137,11 +142,17 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         );
     }
 
+    console.log("response", (tx as RenVMCrossChainTxSubmitter).status.response);
+    const gatewayTarget = isDefined(target) ? target : tx.status.target;
+
     switch (tx.status.status) {
         case ChainTransactionStatus.Done:
             return (
                 <p>
-                    Transaction done! <button onClick={onDone}>Continue</button>
+                    Transaction done!{" "}
+                    <button className="test-indigo-600" onClick={onDone}>
+                        Continue
+                    </button>
                 </p>
             );
         case ChainTransactionStatus.Reverted:
@@ -188,7 +199,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                             className="group w-full mt-4 relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
                             <Spinner /> Waiting for {tx.chain}{" "}
-                            {tx.status.target === 1
+                            {isDefined(gatewayTarget) && gatewayTarget === 1
                                 ? "confirmation"
                                 : "confirmations"}
                             ...
@@ -202,6 +213,13 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                                             .status.response?.txStatus
                                     }
                                     )
+                                </>
+                            ) : isDefined(confirmations) &&
+                              isDefined(gatewayTarget) &&
+                              gatewayTarget > 1 ? (
+                                <>
+                                    {" "}
+                                    ({confirmations}/{gatewayTarget})
                                 </>
                             ) : null}
                         </button>

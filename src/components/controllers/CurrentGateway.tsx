@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { BigNumber } from "bignumber.js";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CheckIcon, XIcon } from "@heroicons/react/solid";
 import { Gateway } from "@renproject/ren";
@@ -12,14 +13,17 @@ import ChainTxHandler from "./ChainTxHandler";
 
 export interface Props {
     gateway: Gateway;
+    amount: string | undefined;
     onDone: () => void;
 }
 
-function CurrentGateway({ gateway, onDone }: Props) {
+function CurrentGateway({ gateway, amount, onDone }: Props) {
     const [done, setDone] = useState(false);
     const [approved, setApproved] = useState(false);
     const [transactionDetected, setTransactionDetected] = useState(false);
     const [balance, setBalance] = useState<string>();
+    const [outputAmount, setOutputAmount] = useState<BigNumber>();
+    const [minimumAmount, setMinimumAmount] = useState<string>();
 
     useEffect(() => {
         (async () => {
@@ -31,6 +35,18 @@ function CurrentGateway({ gateway, onDone }: Props) {
                     gateway.fromChain as Ethereum
                 ).getBalance(gateway.params.asset);
                 setBalance(balance.shiftedBy(-decimals).toFixed());
+                if (amount) {
+                    setOutputAmount(
+                        gateway.fees
+                            .estimateOutput(
+                                new BigNumber(amount).shiftedBy(decimals)
+                            )
+                            .shiftedBy(-decimals)
+                    );
+                }
+                setMinimumAmount(
+                    gateway.fees.minimumAmount.shiftedBy(-decimals).toFixed()
+                );
             } catch (error) {
                 console.error(error);
             }
@@ -103,6 +119,10 @@ function CurrentGateway({ gateway, onDone }: Props) {
                         onDone={onApprovalDone}
                     />
                 </div>
+            ) : outputAmount && outputAmount.isZero() ? (
+                <>
+                    <p>Invalid amount - minimum amount: {minimumAmount}</p>
+                </>
             ) : gateway.in ? (
                 <>
                     {gateway.setup.approval ? (
@@ -134,6 +154,12 @@ function CurrentGateway({ gateway, onDone }: Props) {
             {balance ? (
                 <p className="text-sm text-gray-600 mt-4">
                     Balance: {balance} {gateway.params.asset}
+                </p>
+            ) : null}
+            {outputAmount ? (
+                <p className="text-sm text-gray-600 mt-4">
+                    Receive amount: {outputAmount.toFixed()}{" "}
+                    {gateway.params.asset}
                 </p>
             ) : null}
         </div>

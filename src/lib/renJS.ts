@@ -2,6 +2,7 @@ import { providers } from "ethers";
 
 import { Bitcoin } from "@renproject/chains-bitcoin";
 import {
+    Arbitrum,
     Avalanche,
     BinanceSmartChain,
     Ethereum,
@@ -26,6 +27,8 @@ export interface AssetOption {
 export interface CreateGatewayParams {
     amount?: string;
     toAddress?: string;
+
+    asset?: string;
     from?: AssetOption;
     to?: AssetOption;
 }
@@ -87,6 +90,7 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
     const polygon = getEVMChain(Polygon, NETWORK);
     const avalanche = getEVMChain(Avalanche, NETWORK);
     const fantom = getEVMChain(Fantom, NETWORK);
+    const arbitrum = getEVMChain(Arbitrum, NETWORK);
     const bitcoin = {
         chain: new Bitcoin(NETWORK),
     };
@@ -96,6 +100,7 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
         [BinanceSmartChain.chain]: binanceSmartChain,
         [Polygon.chain]: polygon,
         [Avalanche.chain]: avalanche,
+        [Arbitrum.chain]: arbitrum,
         [Fantom.chain]: fantom,
         [Bitcoin.chain]: bitcoin,
     };
@@ -118,6 +123,7 @@ export const createGateway = async (
         case BinanceSmartChain.chain:
         case Polygon.chain:
         case Avalanche.chain:
+        case Arbitrum.chain:
         case Fantom.chain:
             from = (
                 chains[newGatewayState.from.chain].chain as Ethereum
@@ -138,6 +144,7 @@ export const createGateway = async (
         case BinanceSmartChain.chain:
         case Polygon.chain:
         case Avalanche.chain:
+        case Arbitrum.chain:
         case Fantom.chain:
             to = (chains[newGatewayState.to.chain].chain as Ethereum).Account();
             break;

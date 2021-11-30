@@ -9,6 +9,7 @@
         "@heroicons/react": "^1.0.5",
         "@metamask/detect-provider": "^1.2.0",
         "@renproject/chains-bitcoin": "^3.0.0-alpha.2",
+        "@renproject/chains": "^3.0.0-alpha.2",
         "@renproject/chains-ethereum": "^3.0.0-alpha.2",
         "@renproject/provider": "^3.0.0-alpha.2",
         "@renproject/ren": "^3.0.0-alpha.2",
@@ -30,7 +31,8 @@
         "build": "craco build",
         "test": "craco test",
         "eject": "react-scripts eject",
-        "deploy": "yarn build && yarn gh-pages --dist ./build"
+        "deploy": "sed -i 's/https:\\/\\/renproject.github.io\\/ren-js-v3-demo-mainnet/https:\\/\\/renproject.github.io\\/ren-js-v3-demo/' package.json; yarn build && gh-pages -d build --repo git@github.com:renproject/ren-js-v3-demo.git",
+        "deploy:mainnet": "sed -i 's/https:\\/\\/renproject.github.io\\/ren-js-v3-demo/https:\\/\\/renproject.github.io\\/ren-js-v3-demo-mainnet/' package.json; REACT_APP_NETWORK=mainnet yarn build && gh-pages -d build --repo git@github.com:renproject/ren-js-v3-demo-mainnet.git; sed -i 's/https:\\/\\/renproject.github.io\\/ren-js-v3-demo-mainnet/https:\\/\\/renproject.github.io\\/ren-js-v3-demo/' package.json"
     },
     "eslintConfig": {
         "extends": [

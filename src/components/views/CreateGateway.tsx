@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { CheckIcon } from "@heroicons/react/solid";
 
 import { AssetOption, CreateGatewayParams } from "../../lib/renJS";
+import { AssetSelection } from "./AssetSelection";
 import { Spinner } from "./Spinner";
 import { TokenSelection } from "./TokenSelection";
 
@@ -10,8 +11,9 @@ interface Props {
     connectFrom?: () => Promise<void>;
 
     createGatewayParams: CreateGatewayParams;
-    validFromOptions: Array<AssetOption>;
 
+    assets: string[];
+    validFromOptions: Array<AssetOption>;
     validToOptions: Array<AssetOption>;
 
     updateCreateGatewayParams: (state: CreateGatewayParams) => void;
@@ -22,6 +24,7 @@ function CreateGateway({
     connectFrom,
     // connectTo,
 
+    assets,
     createGatewayParams,
     validFromOptions,
     validToOptions,
@@ -35,6 +38,18 @@ function CreateGateway({
         Error | undefined
     >();
     const [connectedFrom, setConnectedFrom] = useState(false);
+
+    const onSelectAssetOption = useCallback(
+        (asset: string) => {
+            updateCreateGatewayParams({
+                ...createGatewayParams,
+                asset,
+                from: undefined,
+                to: undefined,
+            });
+        },
+        [createGatewayParams, updateCreateGatewayParams]
+    );
 
     const onSelectFromOption = useCallback(
         (from: { asset: string; chain: string; assetOrigin: string }) => {
@@ -55,6 +70,15 @@ function CreateGateway({
         },
         [createGatewayParams, updateCreateGatewayParams]
     );
+
+    const onCancelAssetOption = useCallback(() => {
+        updateCreateGatewayParams({
+            ...createGatewayParams,
+            asset: undefined,
+            from: undefined,
+            to: undefined,
+        });
+    }, [createGatewayParams, updateCreateGatewayParams]);
 
     const onCancelFromOption = useCallback(() => {
         updateCreateGatewayParams({
@@ -123,14 +147,13 @@ function CreateGateway({
         <div className="flex flex-col w-full space-y-4">
             <h3 className="font-bold">Create Gateway</h3>
             <div className="flex items-center">
-                <span className="mr-2">Amount:</span>
-                <input
-                    type="text"
-                    className="p-2 mt-1 border focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                    value={createGatewayParams.amount}
-                    onChange={onAmountChange}
+                <span className="mr-2">Asset:</span>
+                <AssetSelection
+                    option={createGatewayParams.asset}
+                    validOptions={assets}
+                    onSelectOption={onSelectAssetOption}
+                    onCancelOption={onCancelAssetOption}
                 />
-                <div className="ml-2 w-5"></div>
             </div>
             <div className="flex items-center">
                 <span className="mr-2">From:</span>
@@ -162,6 +185,17 @@ function CreateGateway({
                     />
                 </div>
             ) : null}
+
+            <div className="flex items-center">
+                <span className="mr-2">Amount:</span>
+                <input
+                    type="text"
+                    className="p-2 mt-1 border focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                    value={createGatewayParams.amount}
+                    onChange={onAmountChange}
+                />
+                <div className="ml-2 w-5"></div>
+            </div>
 
             {/* {connectFrom || connectTo ? ( */}
             {connectFrom ? (
