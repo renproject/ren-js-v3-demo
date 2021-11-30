@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/ren-js-v3-demo/static/css/main.b8741f0c.chunk.css",
-    "main.js": "/ren-js-v3-demo/static/js/main.2837f1b2.chunk.js",
-    "main.js.map": "/ren-js-v3-demo/static/js/main.2837f1b2.chunk.js.map",
+    "main.css": "/ren-js-v3-demo/static/css/main.eea79dbe.chunk.css",
+    "main.js": "/ren-js-v3-demo/static/js/main.5abccd37.chunk.js",
+    "main.js.map": "/ren-js-v3-demo/static/js/main.5abccd37.chunk.js.map",
     "runtime-main.js": "/ren-js-v3-demo/static/js/runtime-main.5cb773c6.js",
     "runtime-main.js.map": "/ren-js-v3-demo/static/js/runtime-main.5cb773c6.js.map",
-    "static/js/2.12327dd4.chunk.js": "/ren-js-v3-demo/static/js/2.12327dd4.chunk.js",
-    "static/js/2.12327dd4.chunk.js.map": "/ren-js-v3-demo/static/js/2.12327dd4.chunk.js.map",
+    "static/js/2.34d7e0dc.chunk.js": "/ren-js-v3-demo/static/js/2.34d7e0dc.chunk.js",
+    "static/js/2.34d7e0dc.chunk.js.map": "/ren-js-v3-demo/static/js/2.34d7e0dc.chunk.js.map",
     "index.html": "/ren-js-v3-demo/index.html",
-    "static/css/main.b8741f0c.chunk.css.map": "/ren-js-v3-demo/static/css/main.b8741f0c.chunk.css.map",
-    "static/js/2.12327dd4.chunk.js.LICENSE.txt": "/ren-js-v3-demo/static/js/2.12327dd4.chunk.js.LICENSE.txt"
+    "static/css/main.eea79dbe.chunk.css.map": "/ren-js-v3-demo/static/css/main.eea79dbe.chunk.css.map",
+    "static/js/2.34d7e0dc.chunk.js.LICENSE.txt": "/ren-js-v3-demo/static/js/2.34d7e0dc.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.5cb773c6.js",
-    "static/js/2.12327dd4.chunk.js",
-    "static/css/main.b8741f0c.chunk.css",
-    "static/js/main.2837f1b2.chunk.js"
+    "static/js/2.34d7e0dc.chunk.js",
+    "static/css/main.eea79dbe.chunk.css",
+    "static/js/main.5abccd37.chunk.js"
   ]
 }
