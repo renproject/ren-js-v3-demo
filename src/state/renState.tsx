@@ -5,7 +5,7 @@ import { createContainer } from "unstated-next";
 
 import RenJS, { GatewayTransaction } from "@renproject/ren";
 
-import { TransactionParams } from "../../../ren-js-v3/packages/ren/build/main/gatewayTransaction";
+import { TransactionParams } from "@renproject/ren/build/main/gatewayTransaction";
 import { NETWORK } from "../lib/constants";
 import { defaultChains } from "../lib/renJS";
 
