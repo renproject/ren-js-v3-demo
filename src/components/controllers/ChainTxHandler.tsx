@@ -10,7 +10,7 @@ import {
     TxWaiter,
 } from "@renproject/utils";
 
-import { RenVMCrossChainTxSubmitter } from "../../../../ren-js-v3/packages/ren/build/main/renVMTxSubmitter";
+import { RenVMCrossChainTxSubmitter } from "@renproject/ren/build/main/renVMTxSubmitter";
 import { RenState } from "../../state/renState";
 import { Spinner } from "../views/Spinner";
 

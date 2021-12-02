@@ -5,7 +5,7 @@ import { CheckIcon, XIcon } from "@heroicons/react/solid";
 import { Gateway } from "@renproject/ren";
 import { ChainTransactionStatus } from "@renproject/utils";
 
-import { Ethereum } from "../../../../ren-js-v3/packages/chains/chains-ethereum/build/main";
+import { Ethereum } from "@renproject/chains-ethereum/build/main";
 import GatewaySummary from "../views/GatewaySummary";
 import { Spinner } from "../views/Spinner";
 import ViewDepositGateway from "../views/ViewDepositGateway";
