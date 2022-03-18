@@ -5,9 +5,10 @@ import { createContainer } from "unstated-next";
 
 import RenJS, { GatewayTransaction } from "@renproject/ren";
 
-import { TransactionParams } from "../../../ren-js-v3/packages/ren/build/main/gatewayTransaction";
 import { NETWORK } from "../lib/constants";
 import { defaultChains } from "../lib/renJS";
+import { TransactionParams } from "@renproject/ren/build/main/gatewayTransaction";
+import { Ethereum } from "@renproject/chains-ethereum";
 
 // Source: https://usehooks.com/useLocalStorage/
 function useLocalStorage<T>(
@@ -120,18 +121,18 @@ function useRenState() {
         renJS.withChains(...Object.values(chains).map((chain) => chain.chain));
     }, [renJS, chains]);
 
-    const connect = useCallback(
-        (chain: string, provider: any, address: string) => {
-            const chainObject = chains[chain];
-            if (chainObject.chain.withProvider) {
-                chainObject.chain.withProvider(provider);
-            }
-            chains[chain].accounts = [...(chainObject.accounts || []), address];
-            chains[chain].connectionRequired = false;
-            setChains(chains);
-        },
-        [chains]
-    );
+    // const connect = useCallback(
+    //     (chain: string, provider: any, address: string) => {
+    //         const chainObject = chains[chain];
+    //         if (chainObject.chain.withProvider) {
+    //             chainObject.chain.withProvider(provider);
+    //         }
+    //         chains[chain].accounts = [...(chainObject.accounts || []), address];
+    //         chains[chain].connectionRequired = false;
+    //         setChains(chains);
+    //     },
+    //     [chains]
+    // );
 
     const setInjectedWeb3AndConnect = useCallback(
         async (provider: any) => {
@@ -143,24 +144,14 @@ function useRenState() {
                 ).getSigner();
                 const address = await signer.getAddress();
                 setInjectedWeb3Address(address);
-                chains["Ethereum"].chain.withProvider!({
-                    signer,
-                });
-                chains["BinanceSmartChain"].chain.withProvider!({
-                    signer,
-                });
-                chains["Polygon"].chain.withProvider!({
-                    signer,
-                });
-                chains["Fantom"].chain.withProvider!({
-                    signer,
-                });
-                chains["Avalanche"].chain.withProvider!({
-                    signer,
-                });
-                chains["Arbitrum"].chain.withProvider!({
-                    signer,
-                });
+                (chains["Ethereum"].chain as Ethereum).withSigner(signer);
+                (chains["BinanceSmartChain"].chain as Ethereum).withSigner(
+                    signer
+                );
+                (chains["Polygon"].chain as Ethereum).withSigner(signer);
+                (chains["Fantom"].chain as Ethereum).withSigner(signer);
+                (chains["Avalanche"].chain as Ethereum).withSigner(signer);
+                (chains["Arbitrum"].chain as Ethereum).withSigner(signer);
 
                 try {
                     if (!localTxsLoaded) {
@@ -213,13 +204,13 @@ function useRenState() {
                 throw error;
             }
         },
-        [chains, addTransaction, localTxs, localTxsLoaded, renJS]
+        [chains, localTxs, localTxsLoaded, renJS]
     );
 
     return {
         renJS,
         chains,
-        connect,
+        // connect,
         injectedWeb3,
         injectedWeb3Address,
         setInjectedWeb3: setInjectedWeb3AndConnect,

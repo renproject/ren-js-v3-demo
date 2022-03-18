@@ -41,7 +41,10 @@ const assets = Object.values(Chains)
         }>
     )
     .filter(
-        (asset) => mintChains.includes(asset.lockChain) || asset.asset === "BTC"
+        (asset) =>
+            mintChains.includes(asset.lockChain) ||
+            asset.asset === "BTC" ||
+            asset.asset === "BCH"
     );
 
 const fromOptions = assets.reduce(

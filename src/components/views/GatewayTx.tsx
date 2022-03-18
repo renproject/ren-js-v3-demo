@@ -51,7 +51,7 @@ const GatewayTx = ({
         <div
             className={`rounded-md w-full mt-5 ${
                 outTxDone ||
-                (outTx && outTx.status.status === ChainTransactionStatus.Done)
+                (outTx && outTx.progress.status === ChainTransactionStatus.Done)
                     ? "opacity-60"
                     : ""
             }`}
@@ -73,7 +73,7 @@ const GatewayTx = ({
                         {txHash}
                     </a>
                 </p>
-                {inTx && inTx.status.transaction ? (
+                {inTx && inTx.progress.transaction ? (
                     <p className="truncate">
                         {inTx.chain} tx:{" "}
                         <a
@@ -83,14 +83,14 @@ const GatewayTx = ({
                             href={chains[
                                 inTx.chain
                             ].chain.transactionExplorerLink(
-                                inTx.status.transaction
+                                inTx.progress.transaction
                             )}
                         >
-                            {inTx.status.transaction.txidFormatted}
+                            {inTx.progress.transaction.txidFormatted}
                         </a>
                     </p>
                 ) : null}
-                {outTx && outTx.status.transaction ? (
+                {outTx && outTx.progress.transaction ? (
                     <p className="truncate">
                         {outTx.chain} tx:{" "}
                         <a
@@ -100,21 +100,21 @@ const GatewayTx = ({
                             href={chains[
                                 outTx.chain
                             ].chain.transactionExplorerLink(
-                                outTx.status.transaction
+                                outTx.progress.transaction
                             )}
                         >
-                            {outTx.status.transaction.txidFormatted}
+                            {outTx.progress.transaction.txidFormatted}
                         </a>
                     </p>
                 ) : null}
 
                 {!inTxDone &&
                 inTx &&
-                inTx.status.status !== ChainTransactionStatus.Done ? (
+                inTx.progress.status !== ChainTransactionStatus.Done ? (
                     <ChainTxHandler key={"in"} tx={inTx} onDone={onInDone} />
                 ) : !renVMDone &&
                   renVM &&
-                  renVM.status.status !== ChainTransactionStatus.Done ? (
+                  renVM.progress.status !== ChainTransactionStatus.Done ? (
                     <ChainTxHandler
                         key={"renVM"}
                         tx={renVM}
@@ -123,7 +123,7 @@ const GatewayTx = ({
                     />
                 ) : !outTxDone &&
                   outTx &&
-                  outTx.status.status !== ChainTransactionStatus.Done ? (
+                  outTx.progress.status !== ChainTransactionStatus.Done ? (
                     <ChainTxHandler key={"out"} tx={outTx} onDone={onOutDone} />
                 ) : null}
             </div>

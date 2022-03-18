@@ -1,12 +1,11 @@
 import { providers } from "ethers";
 
-import { Bitcoin } from "@renproject/chains-bitcoin";
+import { Bitcoin, BitcoinCash } from "@renproject/chains-bitcoin";
 import {
     Arbitrum,
     Avalanche,
     BinanceSmartChain,
     Ethereum,
-    EthereumBaseChain,
     EthProvider,
     EvmNetworkConfig,
     Fantom,
@@ -16,6 +15,7 @@ import RenJS, { Gateway } from "@renproject/ren";
 import { Chain, RenNetwork } from "@renproject/utils";
 
 import { NETWORK } from "./constants";
+import { EthereumBaseChain } from "@renproject/chains-ethereum/build/main/base";
 
 export interface AssetOption {
     chain: string;
@@ -44,7 +44,7 @@ interface EVMConstructor<EVM> {
         [network in RenNetwork]?: EvmNetworkConfig;
     };
 
-    new (renNetwork: RenNetwork, web3Provider: EthProvider): EVM;
+    new (config: { network: RenNetwork; provider: EthProvider }): EVM;
 }
 
 export const getEVMChain = <EVM extends EthereumBaseChain>(
@@ -76,9 +76,7 @@ export const getEVMChain = <EVM extends EthereumBaseChain>(
     const provider = new providers.JsonRpcProvider(rpcUrl);
 
     return {
-        chain: new ChainClass(network, {
-            provider,
-        }),
+        chain: new ChainClass({ network, provider }),
         connectionRequired: true,
         accounts: [],
     };
@@ -92,7 +90,10 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
     const fantom = getEVMChain(Fantom, NETWORK);
     const arbitrum = getEVMChain(Arbitrum, NETWORK);
     const bitcoin = {
-        chain: new Bitcoin(NETWORK),
+        chain: new Bitcoin({ network: NETWORK }),
+    };
+    const bitcoinCash = {
+        chain: new BitcoinCash({ network: NETWORK }),
     };
 
     return {
@@ -103,6 +104,7 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
         [Arbitrum.chain]: arbitrum,
         [Fantom.chain]: fantom,
         [Bitcoin.chain]: bitcoin,
+        [BitcoinCash.chain]: bitcoinCash,
     };
 };
 
@@ -134,6 +136,11 @@ export const createGateway = async (
                 chains[newGatewayState.from.chain].chain as Bitcoin
             ).GatewayAddress();
             break;
+        case BitcoinCash.chain:
+            from = (
+                chains[newGatewayState.from.chain].chain as BitcoinCash
+            ).GatewayAddress();
+            break;
         default:
             throw new Error(`Unknown chain ${newGatewayState.from.chain}`);
     }
@@ -155,6 +162,14 @@ export const createGateway = async (
             to = (chains[newGatewayState.to.chain].chain as Bitcoin).Address(
                 newGatewayState.toAddress
             );
+            break;
+        case BitcoinCash.chain:
+            if (!newGatewayState.toAddress) {
+                throw new Error(`No recipient address provided.`);
+            }
+            to = (
+                chains[newGatewayState.to.chain].chain as BitcoinCash
+            ).Address(newGatewayState.toAddress);
             break;
         default:
             throw new Error(`Unknown chain ${newGatewayState.to.chain}`);

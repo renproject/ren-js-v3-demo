@@ -5,6 +5,8 @@ import detectEthereumProvider from "@metamask/detect-provider";
 import { RenState } from "../../state/renState";
 import AccountList from "../views/AccountList";
 
+(window as any).detectEthereumProvider = detectEthereumProvider;
+
 const AccountSection = () => {
     const { injectedWeb3Address, setInjectedWeb3 } = RenState.useContainer();
 

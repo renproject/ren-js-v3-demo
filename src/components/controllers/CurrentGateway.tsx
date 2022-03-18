@@ -1,15 +1,15 @@
 import { BigNumber } from "bignumber.js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { CheckIcon, XIcon } from "@heroicons/react/solid";
 import { Gateway } from "@renproject/ren";
 import { ChainTransactionStatus } from "@renproject/utils";
 
-import { Ethereum } from "../../../../ren-js-v3/packages/chains/chains-ethereum/build/main";
 import GatewaySummary from "../views/GatewaySummary";
 import { Spinner } from "../views/Spinner";
 import ViewDepositGateway from "../views/ViewDepositGateway";
 import ChainTxHandler from "./ChainTxHandler";
+import { Ethereum } from "@renproject/chains-ethereum";
 
 export interface Props {
     gateway: Gateway;
@@ -51,7 +51,7 @@ function CurrentGateway({ gateway, amount, onDone }: Props) {
                 console.error(error);
             }
         })().catch(console.error);
-    }, [gateway.params.asset, gateway.fromChain]);
+    }, [gateway.params.asset, gateway.fromChain, amount, gateway.fees]);
 
     const fromAsset = gateway.params.asset;
     const fromChain = gateway.fromChain.chain;
@@ -108,13 +108,13 @@ function CurrentGateway({ gateway, amount, onDone }: Props) {
                     </div>
                 )
             ) : !approved &&
-              gateway.setup.approval &&
-              gateway.setup.approval.status.status !==
+              gateway.inSetup.approval &&
+              gateway.inSetup.approval.progress.status !==
                   ChainTransactionStatus.Done ? (
                 <div className="mt-4">
                     Step 1: Approve {gateway.params.asset}
                     <ChainTxHandler
-                        tx={gateway.setup.approval}
+                        tx={gateway.inSetup.approval}
                         target={1}
                         onDone={onApprovalDone}
                     />
@@ -125,14 +125,15 @@ function CurrentGateway({ gateway, amount, onDone }: Props) {
                 </>
             ) : gateway.in ? (
                 <>
-                    {gateway.setup.approval ? (
+                    {gateway.inSetup.approval ? (
                         <div className="mt-4">
                             Step 1: Approve {gateway.params.asset}{" "}
                             <CheckIcon className="text-indigo-600 h-5 w-5 inline-block" />
                         </div>
                     ) : null}
                     <div className="mt-4">
-                        {gateway.setup.approval ? "Step 2: " : ""}Submit gateway
+                        {gateway.inSetup.approval ? "Step 2: " : ""}Submit
+                        gateway
                         <ChainTxHandler
                             tx={gateway.in}
                             onDone={onGatewayDone}

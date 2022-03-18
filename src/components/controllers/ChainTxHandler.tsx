@@ -5,14 +5,14 @@ import { CheckIcon } from "@heroicons/react/solid";
 import { Ethereum } from "@renproject/chains-ethereum";
 import {
     ChainTransactionStatus,
-    isDefined,
+    utils,
     TxSubmitter,
     TxWaiter,
 } from "@renproject/utils";
 
-import { RenVMCrossChainTxSubmitter } from "../../../../ren-js-v3/packages/ren/build/main/renVMTxSubmitter";
 import { RenState } from "../../state/renState";
 import { Spinner } from "../views/Spinner";
+import { RenVMCrossChainTxSubmitter } from "@renproject/ren/build/main/renVMTxSubmitter";
 
 export interface Props {
     tx: TxSubmitter | TxWaiter;
@@ -41,7 +41,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
 
         try {
             setWaiting(true);
-            await tx.wait(target).on("status", (status) => {
+            await tx.wait(target).on("progress", (status) => {
                 setConfirmations(status.confirmations);
             });
             onDone();
@@ -56,7 +56,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         setErrorSubmitting(undefined);
         setErrorWaiting(undefined);
 
-        if (tx.submit && tx.status.status === ChainTransactionStatus.Ready) {
+        if (tx.submit && tx.progress.status === ChainTransactionStatus.Ready) {
             try {
                 setSubmitting(true);
                 await tx.submit({
@@ -81,11 +81,18 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
             if (autoSubmit) {
                 submit().catch(console.error);
             }
-            if (tx.status.status !== ChainTransactionStatus.Ready) {
+            if (tx.progress.status !== ChainTransactionStatus.Ready) {
                 wait().catch(console.error);
             }
         }
-    }, [calledWait, setCalledWait, submit, autoSubmit, wait, tx.status.status]);
+    }, [
+        calledWait,
+        setCalledWait,
+        submit,
+        autoSubmit,
+        wait,
+        tx.progress.status,
+    ]);
 
     useEffect(() => {
         (async () => {
@@ -147,9 +154,9 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         );
     }
 
-    const gatewayTarget = isDefined(target) ? target : tx.status.target;
+    const gatewayTarget = utils.isDefined(target) ? target : tx.progress.target;
 
-    switch (tx.status.status) {
+    switch (tx.progress.status) {
         case ChainTransactionStatus.Done:
             return (
                 <p>
@@ -160,7 +167,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 </p>
             );
         case ChainTransactionStatus.Reverted:
-            return <p>Transaction reverted: {tx.status.revertReason}</p>;
+            return <p>Transaction reverted: {tx.progress.revertReason}</p>;
         default:
             return (
                 <>
@@ -203,23 +210,24 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                             className="group w-full mt-4 relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
                             <Spinner /> Waiting for {tx.chain}{" "}
-                            {isDefined(gatewayTarget) && gatewayTarget === 1
+                            {utils.isDefined(gatewayTarget) &&
+                            gatewayTarget === 1
                                 ? "confirmation"
                                 : "confirmations"}
                             ...
-                            {(tx as RenVMCrossChainTxSubmitter).status.response
-                                ?.txStatus ? (
+                            {(tx as RenVMCrossChainTxSubmitter).progress
+                                .response?.txStatus ? (
                                 <>
                                     {" "}
                                     (
                                     {
                                         (tx as RenVMCrossChainTxSubmitter)
-                                            .status.response?.txStatus
+                                            .progress.response?.txStatus
                                     }
                                     )
                                 </>
-                            ) : isDefined(confirmations) &&
-                              isDefined(gatewayTarget) &&
+                            ) : utils.isDefined(confirmations) &&
+                              utils.isDefined(gatewayTarget) &&
                               gatewayTarget > 1 ? (
                                 <>
                                     {" "}
