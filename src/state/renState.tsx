@@ -1,14 +1,13 @@
+import { Ethereum } from "@renproject/chains-ethereum";
+import RenJS, { GatewayTransaction } from "@renproject/ren";
+import { TransactionParams } from "@renproject/ren/params";
 import { ethers } from "ethers";
 import { List } from "immutable";
 import { useCallback, useEffect, useState } from "react";
 import { createContainer } from "unstated-next";
 
-import RenJS, { GatewayTransaction } from "@renproject/ren";
-
 import { NETWORK } from "../lib/constants";
 import { defaultChains } from "../lib/renJS";
-import { TransactionParams } from "@renproject/ren/build/main/gatewayTransaction";
-import { Ethereum } from "@renproject/chains-ethereum";
 
 // Source: https://usehooks.com/useLocalStorage/
 function useLocalStorage<T>(

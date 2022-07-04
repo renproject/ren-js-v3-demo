@@ -80,13 +80,16 @@ const GatewayTx = ({
                             className="text-indigo-600"
                             target="_blank"
                             rel="noopener noreferrer"
-                            href={chains[
-                                inTx.chain
-                            ].chain.transactionExplorerLink(
-                                inTx.progress.transaction
-                            )}
+                            href={
+                                inTx.progress.transaction.explorerLink ||
+                                chains[
+                                    inTx.chain
+                                ].chain.transactionExplorerLink(
+                                    inTx.progress.transaction
+                                )
+                            }
                         >
-                            {inTx.progress.transaction.txidFormatted}
+                            {inTx.progress.transaction.txHash}
                         </a>
                     </p>
                 ) : null}
@@ -97,13 +100,16 @@ const GatewayTx = ({
                             className="text-indigo-600"
                             target="_blank"
                             rel="noopener noreferrer"
-                            href={chains[
-                                outTx.chain
-                            ].chain.transactionExplorerLink(
-                                outTx.progress.transaction
-                            )}
+                            href={
+                                outTx.progress.transaction.explorerLink ||
+                                chains[
+                                    outTx.chain
+                                ].chain.transactionExplorerLink(
+                                    outTx.progress.transaction
+                                )
+                            }
                         >
-                            {outTx.progress.transaction.txidFormatted}
+                            {outTx.progress.transaction.txHash}
                         </a>
                     </p>
                 ) : null}

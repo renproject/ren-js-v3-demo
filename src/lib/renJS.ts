@@ -1,5 +1,3 @@
-import { providers } from "ethers";
-
 import { Bitcoin, BitcoinCash } from "@renproject/chains-bitcoin";
 import {
     Arbitrum,
@@ -7,15 +5,17 @@ import {
     BinanceSmartChain,
     Ethereum,
     EthProvider,
-    EvmNetworkConfig,
+    EVMNetworkConfig,
     Fantom,
     Polygon,
+    resolveRpcEndpoints,
 } from "@renproject/chains-ethereum";
+import { EthereumBaseChain } from "@renproject/chains-ethereum//base";
 import RenJS, { Gateway } from "@renproject/ren";
 import { Chain, RenNetwork } from "@renproject/utils";
+import { providers } from "ethers";
 
 import { NETWORK } from "./constants";
-import { EthereumBaseChain } from "@renproject/chains-ethereum/build/main/base";
 
 export interface AssetOption {
     chain: string;
@@ -41,7 +41,7 @@ export interface ChainInstance {
 
 interface EVMConstructor<EVM> {
     configMap: {
-        [network in RenNetwork]?: EvmNetworkConfig;
+        [network in RenNetwork]?: EVMNetworkConfig;
     };
 
     new (config: { network: RenNetwork; provider: EthProvider }): EVM;
@@ -53,27 +53,18 @@ export const getEVMChain = <EVM extends EthereumBaseChain>(
 ): ChainInstance & {
     chain: EVM;
 } => {
-    const config = ChainClass.configMap[network];
-    if (!config) {
+    const networkConfig = ChainClass.configMap[network];
+    if (!networkConfig) {
         throw new Error(
             `No configuration for ${ChainClass.name} on ${network}.`
         );
     }
 
-    let rpcUrl = config.network.rpcUrls[0];
-    if (process.env.REACT_APP_INFURA_KEY) {
-        for (const url of config.network.rpcUrls) {
-            if (url.match(/^https:\/\/.*\$\{INFURA_API_KEY\}/)) {
-                rpcUrl = url.replace(
-                    /\$\{INFURA_API_KEY\}/,
-                    process.env.REACT_APP_INFURA_KEY
-                );
-                break;
-            }
-        }
-    }
+    let rpcUrls = resolveRpcEndpoints(networkConfig.config.rpcUrls, {
+        INFURA_API_KEY: process.env.REACT_APP_INFURA_KEY,
+    });
 
-    const provider = new providers.JsonRpcProvider(rpcUrl);
+    const provider = new providers.JsonRpcProvider(rpcUrls[0]);
 
     return {
         chain: new ChainClass({ network, provider }),
@@ -129,7 +120,7 @@ export const createGateway = async (
         case Fantom.chain:
             from = (
                 chains[newGatewayState.from.chain].chain as Ethereum
-            ).Account({ amount: newGatewayState.amount, convertToWei: true });
+            ).Account({ amount: newGatewayState.amount, convertUnit: true });
             break;
         case Bitcoin.chain:
             from = (

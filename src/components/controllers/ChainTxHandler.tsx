@@ -1,18 +1,17 @@
+import { CheckIcon } from "@heroicons/react/solid";
+import { Ethereum } from "@renproject/chains-ethereum";
+import { RenVMCrossChainTxSubmitter } from "@renproject/ren//renVMTxSubmitter";
+import {
+    ChainTransactionStatus,
+    TxSubmitter,
+    TxWaiter,
+    utils,
+} from "@renproject/utils";
 import BigNumber from "bignumber.js";
 import { useCallback, useEffect, useState } from "react";
 
-import { CheckIcon } from "@heroicons/react/solid";
-import { Ethereum } from "@renproject/chains-ethereum";
-import {
-    ChainTransactionStatus,
-    utils,
-    TxSubmitter,
-    TxWaiter,
-} from "@renproject/utils";
-
 import { RenState } from "../../state/renState";
 import { Spinner } from "../views/Spinner";
-import { RenVMCrossChainTxSubmitter } from "@renproject/ren/build/main/renVMTxSubmitter";
 
 export interface Props {
     tx: TxSubmitter | TxWaiter;
@@ -109,9 +108,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
             if (
                 chainID !==
                 new BigNumber(
-                    (
-                        chains[tx.chain].chain as Ethereum
-                    ).network.network?.chainId
+                    (chains[tx.chain].chain as Ethereum).network.config?.chainId
                 ).toNumber()
             ) {
                 setWrongNetwork(true);
@@ -132,7 +129,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
                 params: [
                     {
                         chainId: (chains[tx.chain].chain as Ethereum).network
-                            .network.chainId,
+                            .config.chainId,
                     },
                 ],
             });
@@ -140,7 +137,7 @@ const ChainTxHandler = ({ tx, target, autoSubmit, onDone }: Props) => {
         } catch (error) {
             await injectedWeb3.request({
                 method: "wallet_addEthereumChain",
-                params: [(chains[tx.chain].chain as Ethereum).network.network],
+                params: [(chains[tx.chain].chain as Ethereum).network.config],
             });
         }
         setWrongNetwork(false);
