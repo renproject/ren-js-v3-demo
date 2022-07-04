@@ -1,20 +1,13 @@
 {
   "files": {
-    "main.css": "/ren-js-v3-demo/static/css/main.eea79dbe.chunk.css",
-    "main.js": "/ren-js-v3-demo/static/js/main.7ac10a76.chunk.js",
-    "main.js.map": "/ren-js-v3-demo/static/js/main.7ac10a76.chunk.js.map",
-    "runtime-main.js": "/ren-js-v3-demo/static/js/runtime-main.5cb773c6.js",
-    "runtime-main.js.map": "/ren-js-v3-demo/static/js/runtime-main.5cb773c6.js.map",
-    "static/js/2.86677caf.chunk.js": "/ren-js-v3-demo/static/js/2.86677caf.chunk.js",
-    "static/js/2.86677caf.chunk.js.map": "/ren-js-v3-demo/static/js/2.86677caf.chunk.js.map",
+    "main.css": "/ren-js-v3-demo/static/css/main.1e57d056.css",
+    "main.js": "/ren-js-v3-demo/static/js/main.a4b98bd2.js",
     "index.html": "/ren-js-v3-demo/index.html",
-    "static/css/main.eea79dbe.chunk.css.map": "/ren-js-v3-demo/static/css/main.eea79dbe.chunk.css.map",
-    "static/js/2.86677caf.chunk.js.LICENSE.txt": "/ren-js-v3-demo/static/js/2.86677caf.chunk.js.LICENSE.txt"
+    "main.1e57d056.css.map": "/ren-js-v3-demo/static/css/main.1e57d056.css.map",
+    "main.a4b98bd2.js.map": "/ren-js-v3-demo/static/js/main.a4b98bd2.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.5cb773c6.js",
-    "static/js/2.86677caf.chunk.js",
-    "static/css/main.eea79dbe.chunk.css",
-    "static/js/main.7ac10a76.chunk.js"
+    "static/css/main.1e57d056.css",
+    "static/js/main.a4b98bd2.js"
   ]
 }
