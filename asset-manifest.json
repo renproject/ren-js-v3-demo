@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ren-js-v3-demo/static/css/main.1e57d056.css",
-    "main.js": "/ren-js-v3-demo/static/js/main.a4b98bd2.js",
+    "main.js": "/ren-js-v3-demo/static/js/main.e80504f0.js",
     "index.html": "/ren-js-v3-demo/index.html",
     "main.1e57d056.css.map": "/ren-js-v3-demo/static/css/main.1e57d056.css.map",
-    "main.a4b98bd2.js.map": "/ren-js-v3-demo/static/js/main.a4b98bd2.js.map"
+    "main.e80504f0.js.map": "/ren-js-v3-demo/static/js/main.e80504f0.js.map"
   },
   "entrypoints": [
     "static/css/main.1e57d056.css",
-    "static/js/main.a4b98bd2.js"
+    "static/js/main.e80504f0.js"
   ]
 }
