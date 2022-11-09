@@ -1,14 +1,10 @@
-import { useCallback, useState } from "react";
-
 import detectEthereumProvider from "@metamask/detect-provider";
 import Chains from "@renproject/chains";
 import { Gateway } from "@renproject/ren";
+import { useCallback, useState } from "react";
 
-import {
-    AssetOption,
-    createGateway,
-    CreateGatewayParams,
-} from "../../lib/renJS";
+import { NETWORK } from "../../lib/constants";
+import { AssetOption, createGateway, CreateGatewayParams } from "../../lib/renJS";
 import { RenState } from "../../state/renState";
 import CreateGateway from "../views/CreateGateway";
 import CurrentGateway from "./CurrentGateway";
@@ -20,19 +16,25 @@ const mintChains = [
     "Fantom",
     "Avalanche",
     "Arbitrum",
+    "Catalog",
+    "Moonbeam",
+    "Kava",
 ];
 
 const assets = Object.values(Chains)
+    .filter((chain) => !!chain.assets[NETWORK as "testnet"])
     .reduce(
         (acc, chain) => [
             ...acc,
-            ...Object.values(chain.assets).map((asset) => ({
-                asset,
-                lockChain: chain.chain,
-                mintChains: mintChains.filter(
-                    (mintChain) => mintChain !== chain.chain
-                ),
-            })),
+            ...Object.values(chain.assets[NETWORK as "testnet"]).map(
+                (asset) => ({
+                    asset,
+                    lockChain: chain.chain,
+                    mintChains: mintChains.filter(
+                        (mintChain) => mintChain !== chain.chain
+                    ),
+                })
+            ),
         ],
         [] as Array<{
             asset: string;

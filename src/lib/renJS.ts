@@ -3,10 +3,14 @@ import {
     Arbitrum,
     Avalanche,
     BinanceSmartChain,
+    Catalog,
     Ethereum,
     EthProvider,
     EVMNetworkConfig,
     Fantom,
+    Goerli,
+    Kava,
+    Moonbeam,
     Polygon,
     resolveRpcEndpoints,
 } from "@renproject/chains-ethereum";
@@ -44,7 +48,11 @@ interface EVMConstructor<EVM> {
         [network in RenNetwork]?: EVMNetworkConfig;
     };
 
-    new (config: { network: RenNetwork; provider: EthProvider }): EVM;
+    new (config: {
+        network: RenNetwork;
+        provider: EthProvider;
+        defaultTestnet: "goerli";
+    }): EVM;
 }
 
 export const getEVMChain = <EVM extends EthereumBaseChain>(
@@ -67,7 +75,7 @@ export const getEVMChain = <EVM extends EthereumBaseChain>(
     const provider = new providers.JsonRpcProvider(rpcUrls[0]);
 
     return {
-        chain: new ChainClass({ network, provider }),
+        chain: new ChainClass({ network, provider, defaultTestnet: "goerli" }),
         connectionRequired: true,
         accounts: [],
     };
@@ -80,6 +88,9 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
     const avalanche = getEVMChain(Avalanche, NETWORK);
     const fantom = getEVMChain(Fantom, NETWORK);
     const arbitrum = getEVMChain(Arbitrum, NETWORK);
+    const catalog = getEVMChain(Catalog, NETWORK);
+    const moonbeam = getEVMChain(Moonbeam, NETWORK);
+    const kava = getEVMChain(Kava, NETWORK);
     const bitcoin = {
         chain: new Bitcoin({ network: NETWORK }),
     };
@@ -89,6 +100,7 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
 
     return {
         [Ethereum.chain]: ethereum,
+        [Goerli.chain]: ethereum,
         [BinanceSmartChain.chain]: binanceSmartChain,
         [Polygon.chain]: polygon,
         [Avalanche.chain]: avalanche,
@@ -96,6 +108,9 @@ export const defaultChains = (): { [chain: string]: ChainInstance } => {
         [Fantom.chain]: fantom,
         [Bitcoin.chain]: bitcoin,
         [BitcoinCash.chain]: bitcoinCash,
+        [Catalog.chain]: catalog,
+        [Kava.chain]: kava,
+        [Moonbeam.chain]: moonbeam,
     };
 };
 
@@ -118,6 +133,9 @@ export const createGateway = async (
         case Avalanche.chain:
         case Arbitrum.chain:
         case Fantom.chain:
+        case Catalog.chain:
+        case Moonbeam.chain:
+        case Kava.chain:
             from = (
                 chains[newGatewayState.from.chain].chain as Ethereum
             ).Account({ amount: newGatewayState.amount, convertUnit: true });
@@ -144,6 +162,7 @@ export const createGateway = async (
         case Avalanche.chain:
         case Arbitrum.chain:
         case Fantom.chain:
+        case Catalog.chain:
             to = (chains[newGatewayState.to.chain].chain as Ethereum).Account();
             break;
         case Bitcoin.chain:

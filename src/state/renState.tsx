@@ -149,8 +149,11 @@ function useRenState() {
                 );
                 (chains["Polygon"].chain as Ethereum).withSigner(signer);
                 (chains["Fantom"].chain as Ethereum).withSigner(signer);
+                (chains["Catalog"].chain as Ethereum).withSigner(signer);
                 (chains["Avalanche"].chain as Ethereum).withSigner(signer);
                 (chains["Arbitrum"].chain as Ethereum).withSigner(signer);
+                (chains["Kava"].chain as Ethereum).withSigner(signer);
+                (chains["Moonbeam"].chain as Ethereum).withSigner(signer);
 
                 try {
                     if (!localTxsLoaded) {
